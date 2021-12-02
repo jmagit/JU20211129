@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.gildedrose.GildedRoseTest
+-------------------------------------------------------------------------------
+Tests run: 27, Failures: 0, Errors: 0, Skipped: 2, Time elapsed: 1.385 s - in com.gildedrose.GildedRoseTest

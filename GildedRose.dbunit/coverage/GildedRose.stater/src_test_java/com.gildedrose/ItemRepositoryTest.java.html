@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ItemRepositoryTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">GildedRose.stater (1) (25 nov. 2020 19:42:50)</a> &gt; <a href="../../index.html" class="el_group">GildedRose.stater</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">com.gildedrose</a> &gt; <span class="el_source">ItemRepositoryTest.java</span></div><h1>ItemRepositoryTest.java</h1><pre class="source lang-java linenums">package com.gildedrose;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
+
+import org.dbunit.DefaultOperationListener;
+import org.dbunit.IDatabaseTester;
+import org.dbunit.JdbcDatabaseTester;
+import org.dbunit.database.DatabaseConfig;
+import org.dbunit.database.IDatabaseConnection;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.ext.mysql.MySqlDataTypeFactory;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+<span class="fc" id="L25">class ItemRepositoryTest {</span>
+	private ItemRepository dao;
+	private IDatabaseTester databaseTester;
+	private IDatabaseConnection connection;
+
+	@BeforeAll
+	static void setUpBeforeClass() throws Exception {
+<span class="fc" id="L32">	}</span>
+
+	@AfterAll
+	static void tearDownAfterClass() throws Exception {
+<span class="fc" id="L36">	}</span>
+
+	@BeforeEach
+	void setUp() throws Exception {
+		// Obtener instancia del DAO que testeamos
+<span class="fc" id="L41">		dao = ItemRepositoryImp.getInstance();</span>
+
+<span class="fc" id="L43">		databaseTester = new JdbcDatabaseTester(&quot;com.mysql.jdbc.Driver&quot;, &quot;jdbc:mysql://localhost/DBUNIT&quot;, &quot;root&quot;,</span>
+<span class="fc" id="L44">				&quot;root&quot;);</span>
+		// Inicializar la BD
+<span class="fc" id="L46">		FlatXmlDataSetBuilder builder = new FlatXmlDataSetBuilder();</span>
+<span class="fc" id="L47">		IDataSet dataSet = builder.build(this.getClass().getResourceAsStream(&quot;/db-init.xml&quot;));</span>
+<span class="fc" id="L48">		databaseTester.setDataSet(dataSet);</span>
+<span class="fc" id="L49">		databaseTester.setOperationListener(new DefaultOperationListener() {</span>
+			@Override
+			public void connectionRetrieved(IDatabaseConnection connection) {
+<span class="fc" id="L52">				connection.getConfig().setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY,</span>
+<span class="fc" id="L53">						new MySqlDataTypeFactory());</span>
+<span class="fc" id="L54">				super.connectionRetrieved(connection);</span>
+<span class="fc" id="L55">			}</span>
+		});
+<span class="fc" id="L57">		databaseTester.onSetup();</span>
+<span class="fc" id="L58">		connection = databaseTester.getConnection();</span>
+<span class="fc" id="L59">		connection.getConfig().setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new MySqlDataTypeFactory());</span>
+<span class="fc" id="L60">	}</span>
+
+	@AfterEach
+	void tearDown() throws Exception {
+<span class="fc" id="L64">		connection.close();</span>
+<span class="fc" id="L65">		databaseTester.onTearDown();</span>
+<span class="fc" id="L66">	}</span>
+	
+	private ITable getTablaActual(String tabla) throws Exception, DataSetException, SQLException {
+<span class="nc" id="L69">		return connection.createDataSet().getTable(tabla);</span>
+	}
+
+	private ITable getTablaActual(String tabla, String sql) throws Exception, DataSetException, SQLException {
+<span class="nc" id="L73">		return connection.createQueryTable(tabla, sql);</span>
+	}
+
+	private ITable getTablaEsperada(String resource, String tabla) throws DataSetException {
+<span class="nc" id="L77">		FlatXmlDataSetBuilder builder = new FlatXmlDataSetBuilder();</span>
+<span class="nc" id="L78">		IDataSet expectedDataSet = builder.build(this.getClass().getResourceAsStream(resource));</span>
+<span class="nc" id="L79">		return expectedDataSet.getTable(tabla);</span>
+	}
+
+
+	@Test
+	void getAllTest() throws Exception {
+<span class="fc" id="L85">		List&lt;Item&gt; actual = dao.getAll();</span>
+<span class="fc" id="L86">		Item product = actual.get(2);</span>
+<span class="fc" id="L87">		assertEquals(10, actual.size());</span>
+<span class="fc" id="L88">		assertAll(&quot;Aged Brie&quot;, </span>
+<span class="fc" id="L89">				() -&gt; assertEquals(&quot;Aged Brie&quot;, product.name, &quot;name&quot;),</span>
+<span class="fc" id="L90">				() -&gt; assertEquals(2, product.sellIn, &quot;sellIn&quot;), </span>
+<span class="fc" id="L91">				() -&gt; assertEquals(0, product.quality, &quot;quality&quot;));</span>
+<span class="fc" id="L92">	}</span>
+	@Test
+	void getOneTest() throws Exception {
+<span class="fc" id="L95">		Optional&lt;Item&gt; actual = dao.getOne(3);</span>
+<span class="fc" id="L96">		assertTrue(actual.isPresent());</span>
+<span class="fc" id="L97">		Item product = actual.get();</span>
+<span class="fc" id="L98">		assertAll(&quot;Aged Brie&quot;, </span>
+<span class="fc" id="L99">				() -&gt; assertEquals(&quot;Aged Brie&quot;, product.name, &quot;name&quot;),</span>
+<span class="fc" id="L100">				() -&gt; assertEquals(2, product.sellIn, &quot;sellIn&quot;), </span>
+<span class="fc" id="L101">				() -&gt; assertEquals(0, product.quality, &quot;quality&quot;));</span>
+<span class="fc" id="L102">	}</span>
+	@Test
+	void getOneNotFoundTest() throws Exception {
+<span class="fc" id="L105">		Optional&lt;Item&gt; actual = dao.getOne(33);</span>
+<span class="fc" id="L106">		assertFalse(actual.isPresent());</span>
+<span class="fc" id="L107">	}</span>
+	@Test
+	void trampaTest() throws Exception {
+<span class="fc" id="L110">		dao.add(new Item(0,&quot;kk&quot;, 1 , 1));</span>
+<span class="fc" id="L111">	}</span>
+	@Test
+	void deleteByIdTest() throws Exception {
+<span class="fc" id="L114">		dao.deleteById(3);</span>
+//		ITable actual = getTablaActual(&quot;products&quot;);
+//		ITable esperado = getTablaEsperada(&quot;item-delete-result.xml&quot;, &quot;products&quot;);
+//		assertEquals(esperado, actual);
+<span class="fc" id="L118">		 List&lt;Item&gt; actual = dao.getAll();</span>
+<span class="fc" id="L119">		 assertEquals(9, actual.size());</span>
+<span class="fc" id="L120">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span>GildedRose.stater (1) (25 nov. 2020 19:42:50)</div></body></html>

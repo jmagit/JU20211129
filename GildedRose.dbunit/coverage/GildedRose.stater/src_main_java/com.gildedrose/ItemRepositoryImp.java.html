@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ItemRepositoryImp.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">GildedRose.stater (1) (25 nov. 2020 19:42:50)</a> &gt; <a href="../../index.html" class="el_group">GildedRose.stater</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.gildedrose</a> &gt; <span class="el_source">ItemRepositoryImp.java</span></div><h1>ItemRepositoryImp.java</h1><pre class="source lang-java linenums">package com.gildedrose;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import com.gildedrose.core.InvalidDataException;
+import com.gildedrose.core.NotFoundException;
+
+/*
+
+CREATE TABLE `Products` (
+	`id` INT NOT NULL AUTO_INCREMENT,
+	`name` VARCHAR(250) NOT NULL,
+	`sellIn` SMALLINT NOT NULL,
+	`quality` TINYINT NOT NULL,
+	PRIMARY KEY (`id`)
+)
+
+*/
+
+<span class="fc" id="L26">public class ItemRepositoryImp implements ItemRepository {</span>
+	public static ItemRepository getInstance() {
+<span class="fc" id="L28">		return new ItemRepositoryImp();</span>
+	}
+
+	@Override
+	public List&lt;Item&gt; getAll() throws Exception {
+<span class="fc" id="L33">		List&lt;Item&gt; rslt = new ArrayList&lt;Item&gt;();</span>
+<span class="fc" id="L34">		try (Connection connection = DBHelper.getConnection()) {</span>
+<span class="fc" id="L35">			String sql = &quot;select * from products&quot;;</span>
+<span class="fc" id="L36">			PreparedStatement stmt = connection.prepareStatement(sql);</span>
+<span class="fc" id="L37">			ResultSet rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">			while (rs.next()) {</span>
+<span class="fc" id="L39">				rslt.add(new Item(rs.getInt(&quot;id&quot;), rs.getString(&quot;name&quot;), rs.getInt(&quot;sellIn&quot;), rs.getInt(&quot;quality&quot;)));</span>
+			}
+<span class="nc" id="L41">		} catch (SQLException ex) {</span>
+<span class="nc" id="L42">			throw new InvalidDataException(ex.getMessage(), ex.getCause());</span>
+<span class="fc" id="L43">		}</span>
+<span class="fc" id="L44">		return rslt;</span>
+	}
+
+	@Override
+	public Optional&lt;Item&gt; getOne(Integer id) throws Exception {
+<span class="fc" id="L49">		try (Connection connection = DBHelper.getConnection()) {</span>
+<span class="fc" id="L50">			String sql = &quot;select * from products where id = ?&quot;;</span>
+<span class="fc" id="L51">			PreparedStatement stmt = connection.prepareStatement(sql);</span>
+<span class="fc" id="L52">			stmt.setInt(1, id);</span>
+<span class="fc" id="L53">			ResultSet rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">			if (rs.next()) {</span>
+<span class="fc" id="L55">				return Optional</span>
+<span class="fc" id="L56">						.of(new Item(rs.getInt(&quot;id&quot;), rs.getString(&quot;name&quot;), rs.getInt(&quot;sellIn&quot;), rs.getInt(&quot;quality&quot;)));</span>
+			} else {
+<span class="fc" id="L58">				return Optional.empty();</span>
+			}
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">		} catch (SQLException ex) {</span>
+<span class="nc" id="L61">			throw new InvalidDataException(ex.getMessage(), ex.getCause());</span>
+		}
+	}
+
+	@Override
+	public void add(Item item) throws InvalidDataException {
+<span class="fc" id="L67">		try (Connection connection = DBHelper.getConnection()) {</span>
+<span class="fc" id="L68">			String sql = &quot;insert into products (name, sellIn, quality) values (?,?,?)&quot;;</span>
+<span class="fc" id="L69">			PreparedStatement stmt = connection.prepareStatement(sql);</span>
+<span class="fc" id="L70">			stmt.setString(1, item.name);</span>
+<span class="fc" id="L71">			stmt.setInt(2, item.sellIn);</span>
+<span class="fc" id="L72">			stmt.setInt(3, item.quality);</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">			if (stmt.executeUpdate() != 1) {</span>
+<span class="nc" id="L74">				throw new InvalidDataException(&quot;Insert failed!&quot;);</span>
+			}
+<span class="nc" id="L76">		} catch (SQLException ex) {</span>
+<span class="nc" id="L77">			throw new InvalidDataException(ex.getMessage(), ex.getCause());</span>
+<span class="fc" id="L78">		}</span>
+<span class="fc" id="L79">	}</span>
+
+	@Override
+	public void modify(Item item) throws NotFoundException, InvalidDataException {
+<span class="fc" id="L83">		try (Connection connection = DBHelper.getConnection()) {</span>
+<span class="fc" id="L84">			String sql = &quot;update products set name = ?, sellIn = ?, quality = ? where id = ?&quot;;</span>
+<span class="fc" id="L85">			PreparedStatement stmt = connection.prepareStatement(sql);</span>
+<span class="fc" id="L86">			stmt.setString(1, item.name);</span>
+<span class="fc" id="L87">			stmt.setInt(2, item.sellIn);</span>
+<span class="fc" id="L88">			stmt.setInt(3, item.quality);</span>
+<span class="fc" id="L89">			stmt.setInt(4, item.id);</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">			if (stmt.executeUpdate() != 1) {</span>
+<span class="nc" id="L91">				throw new InvalidDataException(&quot;Update failed!&quot;);</span>
+			}
+<span class="nc" id="L93">		} catch (SQLException ex) {</span>
+<span class="nc" id="L94">			throw new InvalidDataException(ex.getMessage(), ex.getCause());</span>
+<span class="fc" id="L95">		}</span>
+<span class="fc" id="L96">	}</span>
+
+	@Override
+	public void delete(Item item) throws NotFoundException {
+<span class="nc" id="L100">		deleteById(item.id);</span>
+<span class="nc" id="L101">	}</span>
+
+	@Override
+	public void deleteById(Integer id) throws NotFoundException {
+<span class="fc" id="L105">		try (Connection connection = DBHelper.getConnection()) {</span>
+<span class="fc" id="L106">			String sql = &quot;delete from products where id = ?&quot;;</span>
+<span class="fc" id="L107">			PreparedStatement stmt = connection.prepareStatement(sql);</span>
+<span class="fc" id="L108">			stmt.setInt(1, id);</span>
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">			if (stmt.executeUpdate() != 1) {</span>
+<span class="nc" id="L110">				throw new NotFoundException();</span>
+			}
+<span class="nc" id="L112">		} catch (SQLException ex) {</span>
+<span class="nc" id="L113">			throw new NotFoundException();</span>
+<span class="fc" id="L114">		}</span>
+<span class="fc" id="L115">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span>GildedRose.stater (1) (25 nov. 2020 19:42:50)</div></body></html>

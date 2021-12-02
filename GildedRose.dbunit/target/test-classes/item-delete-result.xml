@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <products id="1" name="Normal Product" sellIn="1" quality="1" />
+    <products id="2" name="+5 Dexterity Vest" sellIn="10" quality="20" />
+    <products id="4" name="Elixir of the Mongoose" sellIn="5" quality="7" />
+    <products id="5" name="Sulfuras, Hand of Ragnaros" sellIn="0" quality="80" />
+    <products id="6" name="Sulfuras, Hand of Ragnaros" sellIn="-1" quality="80" />
+    <products id="7" name="Backstage passes to a TAFKAL80ETC concert" sellIn="15" quality="20" />
+    <products id="8" name="Backstage passes to a TAFKAL80ETC concert" sellIn="10" quality="49" />
+    <products id="9" name="Backstage passes to a TAFKAL80ETC concert" sellIn="5" quality="49" />
+    <products id="10" name="Conjured Mana Cake" sellIn="3" quality="6" />
+</dataset>

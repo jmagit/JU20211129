@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>GildedRoseTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">GildedRose.stater (1) (25 nov. 2020 19:42:50)</a> &gt; <a href="../../index.html" class="el_group">GildedRose.stater</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">com.gildedrose</a> &gt; <span class="el_source">GildedRoseTest.java</span></div><h1>GildedRoseTest.java</h1><pre class="source lang-java linenums">package com.gildedrose;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+import org.dbunit.dataset.ITable;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
+
+import static org.mockito.Mockito.*;
+
+import com.gildedrose.core.InvalidDataException;
+import com.gildedrose.core.SpaceCamelCase;
+
+@DisplayNameGeneration(SpaceCamelCase.class)
+@ExtendWith(MockitoExtension.class)
+<span class="nc" id="L32">class GildedRoseTest {</span>
+
+	@Test
+	void minQualityInvalidTest() {
+<span class="nc" id="L36">		Item product = new Item(&quot;Elixir of the Mongoose&quot;, 1, -1);</span>
+<span class="nc" id="L37">		assertThrows(Exception.class, () -&gt; new GildedRose(new Item[] { product }));</span>
+<span class="nc" id="L38">	}</span>
+
+	@Test
+	void maxQualityInvalidTest() {
+<span class="nc" id="L42">		Item product = new Item(&quot;+5 Dexterity Vest&quot;, 1, 80);</span>
+<span class="nc" id="L43">		assertThrows(Exception.class, () -&gt; new GildedRose(new Item[] { product }));</span>
+<span class="nc" id="L44">	}</span>
+
+	@Test
+	void sulfurasQualityInvalidTest() {
+<span class="nc" id="L48">		Item product = new Item(&quot;Sulfuras, Hand of Ragnaros&quot;, 1, 66);</span>
+<span class="nc" id="L49">		assertThrows(Exception.class, () -&gt; new GildedRose(new Item[] { product }));</span>
+<span class="nc" id="L50">	}</span>
+
+	@Test
+	@Disabled
+	void privateRefInvalidTest() {
+<span class="nc" id="L55">		Item product = new Item(&quot;Elixir of the Mongoose&quot;, 1, 10);</span>
+<span class="nc" id="L56">		GildedRose app = new GildedRose(new Item[] { product });</span>
+<span class="nc" id="L57">		product.sellIn = 0;</span>
+<span class="nc" id="L58">		assertEquals(1, app.items[0].sellIn);</span>
+<span class="nc" id="L59">	}</span>
+
+	@ParameterizedTest
+	@CsvSource({ &quot;1, 80, 1, 80&quot;, &quot;-1, 80, -1, 80&quot;, })
+	void productSulfurasValidTest(int sellIn, int quality, int sellInResult, int qualityResult) {
+<span class="nc" id="L64">		String name = &quot;Sulfuras, Hand of Ragnaros&quot;;</span>
+<span class="nc" id="L65">		Item product = new Item(name, sellIn, quality);</span>
+<span class="nc" id="L66">		GildedRose app = new GildedRose(new Item[] { product });</span>
+<span class="nc" id="L67">		app.updateQuality();</span>
+<span class="nc" id="L68">		assertAll(name, () -&gt; assertEquals(name, product.name, &quot;name&quot;),</span>
+<span class="nc" id="L69">				() -&gt; assertEquals(sellInResult, product.sellIn, &quot;sellIn&quot;),</span>
+<span class="nc" id="L70">				() -&gt; assertEquals(80, product.quality, &quot;quality&quot;));</span>
+<span class="nc" id="L71">	}</span>
+
+	@ParameterizedTest
+	@CsvSource({ &quot;-1, 1, -2, 0&quot;, &quot;-10, 3, -11, 1&quot;, &quot;0, 0, -1, 0&quot;, &quot; 7, 6, 6, 5&quot;, })
+	void otherProductTest(int sellIn, int quality, int sellInResult, int qualityResult) {
+<span class="nc" id="L76">		String name = &quot;Normal Product&quot;;</span>
+<span class="nc" id="L77">		Item product = new Item(name, sellIn, quality);</span>
+<span class="nc" id="L78">		GildedRose app = new GildedRose(new Item[] { product });</span>
+<span class="nc" id="L79">		app.updateQuality();</span>
+<span class="nc" id="L80">		assertAll(name, () -&gt; assertEquals(name, product.name, &quot;name&quot;),</span>
+<span class="nc" id="L81">				() -&gt; assertEquals(sellInResult, product.sellIn, &quot;sellIn&quot;),</span>
+<span class="nc" id="L82">				() -&gt; assertEquals(qualityResult, product.quality, &quot;quality&quot;));</span>
+<span class="nc" id="L83">	}</span>
+
+	@ParameterizedTest
+	@CsvSource({ &quot;-2, 49, -3, 50&quot;, &quot;-1, 48, -2, 50&quot;, &quot;2, 50, 1, 50&quot;, &quot;2, 0, 1, 1&quot;, })
+	void productAgedBrieTest(int sellIn, int quality, int sellInResult, int qualityResult) {
+<span class="nc" id="L88">		String name = &quot;Aged Brie&quot;;</span>
+<span class="nc" id="L89">		Item product = new Item(name, sellIn, quality);</span>
+<span class="nc" id="L90">		GildedRose app = new GildedRose(new Item[] { product });</span>
+<span class="nc" id="L91">		app.updateQuality();</span>
+<span class="nc" id="L92">		assertAll(name, () -&gt; assertEquals(name, product.name, &quot;name&quot;),</span>
+<span class="nc" id="L93">				() -&gt; assertEquals(sellInResult, product.sellIn, &quot;sellIn&quot;),</span>
+<span class="nc" id="L94">				() -&gt; assertEquals(qualityResult, product.quality, &quot;quality&quot;));</span>
+<span class="nc" id="L95">	}</span>
+
+	@ParameterizedTest
+	@CsvSource({ &quot;11, 0, 10, 1&quot;, &quot;7, 1, 6, 3&quot;, &quot;3, 49, 2, 50&quot;, &quot;5, 3, 4, 6&quot;, &quot;0, 3, -1, 0&quot;, &quot;-1, 3, -2, 0&quot;, })
+	void productBackstagePassesTest(int sellIn, int quality, int sellInResult, int qualityResult) {
+<span class="nc" id="L100">		String name = &quot;Backstage passes to a TAFKAL80ETC concert&quot;;</span>
+<span class="nc" id="L101">		Item product = new Item(name, sellIn, quality);</span>
+<span class="nc" id="L102">		GildedRose app = new GildedRose(new Item[] { product });</span>
+<span class="nc" id="L103">		app.updateQuality();</span>
+<span class="nc" id="L104">		assertAll(name, () -&gt; assertEquals(name, product.name, &quot;name&quot;),</span>
+<span class="nc" id="L105">				() -&gt; assertEquals(sellInResult, product.sellIn, &quot;sellIn&quot;),</span>
+<span class="nc" id="L106">				() -&gt; assertEquals(qualityResult, product.quality, &quot;quality&quot;));</span>
+<span class="nc" id="L107">	}</span>
+
+	@Disabled
+	@ParameterizedTest
+	@CsvSource({ &quot;11, 10, 10, 8&quot;, &quot;7, 1, 6, -1&quot;, &quot;-5, 10, -6, 6&quot;, &quot;0, 3, -1, 0&quot;, })
+	void productConjuredTest(int sellIn, int quality, int sellInResult, int qualityResult) {
+<span class="nc" id="L113">		String name = &quot;Conjured Mana Cake&quot;;</span>
+<span class="nc" id="L114">		Item product = new Item(name, sellIn, quality);</span>
+<span class="nc" id="L115">		GildedRose app = new GildedRose(new Item[] { product });</span>
+<span class="nc" id="L116">		app.updateQuality();</span>
+<span class="nc" id="L117">		assertAll(name, () -&gt; assertEquals(name, product.name, &quot;name&quot;),</span>
+<span class="nc" id="L118">				() -&gt; assertEquals(sellInResult, product.sellIn, &quot;sellIn&quot;),</span>
+<span class="nc" id="L119">				() -&gt; assertEquals(qualityResult, product.quality, &quot;quality&quot;));</span>
+<span class="nc" id="L120">	}</span>
+
+	@Test
+	@Tag(&quot;mock&quot;)
+	void demoMockTest() throws Exception {
+<span class="nc" id="L125">		ItemRepository dao = mock(ItemRepository.class);</span>
+<span class="nc" id="L126">		when(dao.getOne(anyInt())).thenReturn(Optional.of(new Item(&quot;Aged Brie&quot;, 1, 7)));</span>
+		// when(dao.getOne(2)).thenReturn(Optional.of(new Item(&quot;Backstage passes to a
+		// TAFKAL80ETC concert&quot;, 3, 10)));
+
+<span class="nc" id="L130">		Item product = dao.getOne(2).get();</span>
+
+<span class="nc" id="L132">		assertAll(&quot;Aged Brie&quot;, () -&gt; assertEquals(&quot;Aged Brie&quot;, product.name, &quot;name&quot;),</span>
+<span class="nc" id="L133">				() -&gt; assertEquals(1, product.sellIn, &quot;sellIn&quot;), () -&gt; assertEquals(7, product.quality, &quot;quality&quot;));</span>
+<span class="nc" id="L134">	}</span>
+
+
+<span class="nc" id="L137">	Item[] items = new Item[] { new Item(1, &quot;Normal Product&quot;, 0, 1), //</span>
+<span class="nc" id="L138">			new Item(2, &quot;+5 Dexterity Vest&quot;, 10, 20), //</span>
+<span class="nc" id="L139">			new Item(3, &quot;Aged Brie&quot;, 2, 0), //</span>
+<span class="nc" id="L140">			new Item(4, &quot;Elixir of the Mongoose&quot;, 5, 7), //</span>
+<span class="nc" id="L141">			new Item(5, &quot;Sulfuras, Hand of Ragnaros&quot;, 0, 80), //</span>
+<span class="nc" id="L142">			new Item(6, &quot;Sulfuras, Hand of Ragnaros&quot;, -1, 80),</span>
+<span class="nc" id="L143">			new Item(7, &quot;Backstage passes to a TAFKAL80ETC concert&quot;, 15, 20),</span>
+<span class="nc" id="L144">			new Item(8, &quot;Backstage passes to a TAFKAL80ETC concert&quot;, 10, 49),</span>
+<span class="nc" id="L145">			new Item(9, &quot;Backstage passes to a TAFKAL80ETC concert&quot;, 5, 49), new Item(10, &quot;Conjured Mana Cake&quot;, 3, 6) };</span>
+
+	@Test
+	@Tag(&quot;mock&quot;)
+	void demoMockMuchosTest() throws Exception {
+<span class="nc" id="L150">		ItemRepository dao = mock(ItemRepository.class);</span>
+<span class="nc" id="L151">		when(dao.getAll()).thenReturn(Arrays.asList(items));</span>
+
+<span class="nc" id="L153">		List&lt;Item&gt; lst = dao.getAll();</span>
+<span class="nc" id="L154">		Item product = lst.get(2);</span>
+
+<span class="nc" id="L156">		assertEquals(10, lst.size());</span>
+<span class="nc" id="L157">		assertAll(&quot;Aged Brie&quot;, () -&gt; assertEquals(&quot;Aged Brie&quot;, product.name, &quot;name&quot;),</span>
+<span class="nc" id="L158">				() -&gt; assertEquals(2, product.sellIn, &quot;sellIn&quot;), () -&gt; assertEquals(0, product.quality, &quot;quality&quot;));</span>
+<span class="nc" id="L159">	}</span>
+
+	@Test
+	@Tag(&quot;mock&quot;)
+	void constructorGildedRoseTest() throws Exception {
+<span class="nc" id="L164">		ItemRepository dao = mock(ItemRepository.class);</span>
+<span class="nc" id="L165">		when(dao.getAll()).thenReturn(Arrays.asList(items));</span>
+<span class="nc" id="L166">		when(dao.getOne(anyInt())).thenAnswer(new Answer() {</span>
+			public Object answer(InvocationOnMock invocation) {
+<span class="nc" id="L168">				Object[] args = invocation.getArguments();</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">				if ((int) args[0] &gt; items.length)</span>
+<span class="nc" id="L170">					return Optional.empty();</span>
+					//throw new IndexOutOfBoundsException();
+<span class="nc" id="L172">				return Optional.of(items[(int) args[0]]);</span>
+			}
+		});
+
+<span class="nc" id="L176">		GildedRose app = new GildedRose(dao);</span>
+<span class="nc" id="L177">		app.updateQuality();</span>
+<span class="nc" id="L178">		Item product = dao.getOne(2).get();</span>
+
+<span class="nc" id="L180">		assertEquals(10, app.items.length);</span>
+<span class="nc" id="L181">		assertAll(&quot;Aged Brie&quot;, () -&gt; assertEquals(&quot;Aged Brie&quot;, product.name, &quot;name&quot;),</span>
+<span class="nc" id="L182">				() -&gt; assertEquals(1, product.sellIn, &quot;sellIn&quot;), () -&gt; assertEquals(1, product.quality, &quot;quality&quot;));</span>
+<span class="nc" id="L183">		assertFalse(dao.getOne(22).isPresent());</span>
+		// assertThrows(IndexOutOfBoundsException.class, () -&gt; dao.getOne(22));
+<span class="nc" id="L185">	}</span>
+
+	@Test
+	@Tag(&quot;mock&quot;)
+	void saveGildedRoseTest() throws Exception {
+<span class="nc" id="L190">		ItemRepository dao = mock(ItemRepository.class);</span>
+<span class="nc" id="L191">		when(dao.getAll()).thenReturn(Arrays.asList(items));</span>
+<span class="nc" id="L192">		doNothing().when(dao).modify(any());</span>
+
+<span class="nc" id="L194">		GildedRose app = new GildedRose(dao);</span>
+<span class="nc" id="L195">		app.updateQuality();</span>
+<span class="nc" id="L196">		Item product = app.items[2];</span>
+<span class="nc" id="L197">		app.save();</span>
+
+<span class="nc" id="L199">		assertEquals(10, app.items.length);</span>
+<span class="nc" id="L200">		assertAll(&quot;Aged Brie&quot;, () -&gt; assertEquals(&quot;Aged Brie&quot;, product.name, &quot;name&quot;),</span>
+<span class="nc" id="L201">				() -&gt; assertEquals(1, product.sellIn, &quot;sellIn&quot;), () -&gt; assertEquals(1, product.quality, &quot;quality&quot;));</span>
+
+<span class="nc" id="L203">		verify(dao, times(10)).modify(any());</span>
+<span class="nc" id="L204">	}</span>
+
+	@Test
+	@Tag(&quot;mock&quot;)
+	void saveMalGildedRoseTest() throws Exception {
+<span class="nc" id="L209">		ItemRepository dao = mock(ItemRepository.class);</span>
+<span class="nc" id="L210">		when(dao.getAll()).thenReturn(Arrays.asList(items));</span>
+<span class="nc" id="L211">		doNothing().when(dao).modify(any());</span>
+<span class="nc" id="L212">		doThrow(InvalidDataException.class).when(dao).modify(items[7]);</span>
+
+<span class="nc" id="L214">		GildedRose app = new GildedRose(dao);</span>
+<span class="nc" id="L215">		app.updateQuality();</span>
+<span class="nc" id="L216">		assertThrows(InvalidDataException.class, () -&gt; app.save());</span>
+
+<span class="nc" id="L218">		verify(dao, times(8)).modify(any());</span>
+<span class="nc" id="L219">	}</span>
+	
+	@Test
+	@Tag(&quot;mock&quot;)
+	@Disabled
+	void saveRealGildedRoseTest() throws Exception {
+<span class="nc" id="L225">		ItemRepository dao = spy(new ItemRepositoryImp());</span>
+<span class="nc" id="L226">		GildedRose app = new GildedRose(dao);</span>
+
+<span class="nc" id="L228">		app.updateQuality();</span>
+<span class="nc" id="L229">		app.save();</span>
+<span class="nc" id="L230">		Item product = dao.getOne(3).get();</span>
+
+<span class="nc" id="L232">		assertEquals(10, app.items.length);</span>
+//		assertAll(&quot;Aged Brie&quot;, () -&gt; assertEquals(&quot;Aged Brie&quot;, product.name, &quot;name&quot;),
+//				() -&gt; assertEquals(-4, product.sellIn, &quot;sellIn&quot;), () -&gt; assertEquals(10, product.quality, &quot;quality&quot;));
+
+<span class="nc" id="L236">		verify(dao, times(10)).modify(any());</span>
+<span class="nc" id="L237">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span>GildedRose.stater (1) (25 nov. 2020 19:42:50)</div></body></html>
