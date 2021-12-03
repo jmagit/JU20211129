@@ -1,4 +1,4 @@
-package com.gildedrose;
+package com.gildedrose.infraestructure;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -26,6 +26,9 @@ import static org.mockito.Mockito.*;
 
 import com.gildedrose.core.InvalidDataException;
 import com.gildedrose.core.SpaceCamelCase;
+import com.gildedrose.domains.contracts.ItemRepository;
+import com.gildedrose.domains.entities.Item;
+import com.gildedrose.infraestructure.ItemRepositoryImp;
 
 @DisplayNameGeneration(SpaceCamelCase.class)
 @ExtendWith(MockitoExtension.class)

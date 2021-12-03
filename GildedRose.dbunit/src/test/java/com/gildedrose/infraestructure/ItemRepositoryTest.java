@@ -1,4 +1,4 @@
-package com.gildedrose;
+package com.gildedrose.infraestructure;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,8 +21,17 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.Alphanumeric;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
+import com.gildedrose.domains.contracts.ItemRepository;
+import com.gildedrose.domains.entities.Item;
+import com.gildedrose.infraestructure.ItemRepositoryImp;
+
+@TestMethodOrder(OrderAnnotation.class)
 class ItemRepositoryTest {
 	private ItemRepository dao;
 	private IDatabaseTester databaseTester;
@@ -107,8 +116,13 @@ class ItemRepositoryTest {
 		assertFalse(actual.isPresent());
 	}
 	@Test
-	void trampaTest() throws Exception {
+	@Order(1)
+	void AddTest() throws Exception {
 		dao.add(new Item(0,"kk", 1 , 1));
+	}
+	@Test
+	void ModifyTest() throws Exception {
+		dao.modify(new Item(10,"Modificado", 10 , 10));
 	}
 	@Test
 	void deleteByIdTest() throws Exception {

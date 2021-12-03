@@ -2,6 +2,8 @@ package com.gildedrose;
 
 import com.gildedrose.core.InvalidDataException;
 import com.gildedrose.core.NotFoundException;
+import com.gildedrose.domains.contracts.ItemRepository;
+import com.gildedrose.domains.entities.Item;
 
 public class GildedRose {
     Item[] items;
