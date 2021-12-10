@@ -1,4 +1,4 @@
-package com.gildedrose;
+package com.gildedrose.infraestructure;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,6 +10,8 @@ import java.util.Optional;
 
 import com.gildedrose.core.InvalidDataException;
 import com.gildedrose.core.NotFoundException;
+import com.gildedrose.domains.contracts.ItemRepository;
+import com.gildedrose.domains.entities.Item;
 
 /*
 CREATE DATABASE `curso` 

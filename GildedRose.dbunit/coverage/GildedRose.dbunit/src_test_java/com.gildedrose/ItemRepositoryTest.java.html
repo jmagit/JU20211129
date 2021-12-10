@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ItemRepositoryTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">GildedRose.dbunit (3 dic. 2021 13:08:09)</a> &gt; <a href="../../index.html" class="el_group">GildedRose.dbunit</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">com.gildedrose</a> &gt; <span class="el_source">ItemRepositoryTest.java</span></div><h1>ItemRepositoryTest.java</h1><pre class="source lang-java linenums">package com.gildedrose;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
+
+import org.dbunit.Assertion;
+import org.dbunit.DefaultOperationListener;
+import org.dbunit.IDatabaseTester;
+import org.dbunit.JdbcDatabaseTester;
+import org.dbunit.database.DatabaseConfig;
+import org.dbunit.database.IDatabaseConnection;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.ext.mysql.MySqlDataTypeFactory;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.Alphanumeric;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+
+import com.gildedrose.domains.contracts.ItemRepository;
+import com.gildedrose.domains.entities.Item;
+import com.gildedrose.infraestructure.ItemRepositoryImp;
+
+@TestMethodOrder(OrderAnnotation.class)
+<span class="fc" id="L35">class ItemRepositoryTest {</span>
+	private ItemRepository dao;
+	private IDatabaseTester databaseTester;
+	private IDatabaseConnection connection;
+
+	@BeforeAll
+	static void setUpBeforeClass() throws Exception {
+<span class="fc" id="L42">	}</span>
+
+	@AfterAll
+	static void tearDownAfterClass() throws Exception {
+<span class="fc" id="L46">	}</span>
+
+	@BeforeEach
+	void setUp() throws Exception {
+		// Obtener instancia del DAO que testeamos
+<span class="fc" id="L51">		dao = ItemRepositoryImp.getInstance();</span>
+
+<span class="fc" id="L53">		databaseTester = new JdbcDatabaseTester(&quot;com.mysql.jdbc.Driver&quot;, &quot;jdbc:mysql://localhost:3306/curso?verifyServerCertificate=false&amp;useSSL=true&quot;, &quot;root&quot;,</span>
+<span class="fc" id="L54">				&quot;root&quot;);</span>
+		// Inicializar la BD
+<span class="fc" id="L56">		FlatXmlDataSetBuilder builder = new FlatXmlDataSetBuilder();</span>
+<span class="fc" id="L57">		IDataSet dataSet = builder.build(this.getClass().getResourceAsStream(&quot;/db-init.xml&quot;));</span>
+<span class="fc" id="L58">		databaseTester.setDataSet(dataSet);</span>
+<span class="fc" id="L59">		databaseTester.setOperationListener(new DefaultOperationListener() {</span>
+			@Override
+			public void connectionRetrieved(IDatabaseConnection connection) {
+<span class="fc" id="L62">				connection.getConfig().setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY,</span>
+<span class="fc" id="L63">						new MySqlDataTypeFactory());</span>
+<span class="fc" id="L64">				super.connectionRetrieved(connection);</span>
+<span class="fc" id="L65">			}</span>
+		});
+<span class="fc" id="L67">		databaseTester.onSetup();</span>
+<span class="fc" id="L68">		connection = databaseTester.getConnection();</span>
+<span class="fc" id="L69">		connection.getConfig().setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new MySqlDataTypeFactory());</span>
+<span class="fc" id="L70">	}</span>
+
+	@AfterEach
+	void tearDown() throws Exception {
+<span class="fc" id="L74">		connection.close();</span>
+<span class="fc" id="L75">		databaseTester.onTearDown();</span>
+<span class="fc" id="L76">	}</span>
+	
+	private ITable getTablaActual(String tabla) throws Exception, DataSetException, SQLException {
+<span class="fc" id="L79">		return connection.createDataSet().getTable(tabla);</span>
+	}
+
+	private ITable getTablaActual(String tabla, String sql) throws Exception, DataSetException, SQLException {
+<span class="nc" id="L83">		return connection.createQueryTable(tabla, sql);</span>
+	}
+
+	private ITable getTablaEsperada(String resource, String tabla) throws DataSetException {
+<span class="fc" id="L87">		FlatXmlDataSetBuilder builder = new FlatXmlDataSetBuilder();</span>
+<span class="fc" id="L88">		IDataSet expectedDataSet = builder.build(this.getClass().getResourceAsStream(resource));</span>
+<span class="fc" id="L89">		return expectedDataSet.getTable(tabla);</span>
+	}
+
+
+	@Test
+	void getAllTest() throws Exception {
+<span class="fc" id="L95">		List&lt;Item&gt; actual = dao.getAll();</span>
+<span class="fc" id="L96">		Item product = actual.get(2);</span>
+<span class="fc" id="L97">		assertEquals(10, actual.size());</span>
+<span class="fc" id="L98">		assertAll(&quot;Aged Brie&quot;, </span>
+<span class="fc" id="L99">				() -&gt; assertEquals(&quot;Aged Brie&quot;, product.name, &quot;name&quot;),</span>
+<span class="fc" id="L100">				() -&gt; assertEquals(2, product.sellIn, &quot;sellIn&quot;), </span>
+<span class="fc" id="L101">				() -&gt; assertEquals(0, product.quality, &quot;quality&quot;));</span>
+<span class="fc" id="L102">	}</span>
+	@Test
+	void getOneTest() throws Exception {
+<span class="fc" id="L105">		Optional&lt;Item&gt; actual = dao.getOne(3);</span>
+<span class="fc" id="L106">		assertTrue(actual.isPresent());</span>
+<span class="fc" id="L107">		Item product = actual.get();</span>
+<span class="fc" id="L108">		assertAll(&quot;Aged Brie&quot;, </span>
+<span class="fc" id="L109">				() -&gt; assertEquals(&quot;Aged Brie&quot;, product.name, &quot;name&quot;),</span>
+<span class="fc" id="L110">				() -&gt; assertEquals(2, product.sellIn, &quot;sellIn&quot;), </span>
+<span class="fc" id="L111">				() -&gt; assertEquals(0, product.quality, &quot;quality&quot;));</span>
+<span class="fc" id="L112">	}</span>
+	@Test
+	void getOneNotFoundTest() throws Exception {
+<span class="fc" id="L115">		Optional&lt;Item&gt; actual = dao.getOne(33);</span>
+<span class="fc" id="L116">		assertFalse(actual.isPresent());</span>
+<span class="fc" id="L117">	}</span>
+	@Test
+	@Order(1)
+	void AddTest() throws Exception {
+<span class="fc" id="L121">		dao.add(new Item(0,&quot;kk&quot;, 1 , 1));</span>
+<span class="fc" id="L122">	}</span>
+	@Test
+	void ModifyTest() throws Exception {
+<span class="fc" id="L125">		dao.modify(new Item(10,&quot;Modificado&quot;, 10 , 10));</span>
+<span class="fc" id="L126">	}</span>
+	@Test
+	void deleteByIdTest() throws Exception {
+<span class="fc" id="L129">		dao.deleteById(3);</span>
+<span class="fc" id="L130">		ITable actual = getTablaActual(&quot;products&quot;);</span>
+<span class="fc" id="L131">		ITable esperado = getTablaEsperada(&quot;/item-delete-result.xml&quot;, &quot;products&quot;);</span>
+<span class="fc" id="L132">		Assertion.assertEquals(esperado, actual);</span>
+//		 List&lt;Item&gt; actual = dao.getAll();
+//		 assertEquals(9, actual.size());
+<span class="fc" id="L135">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span>GildedRose.dbunit (3 dic. 2021 13:08:09)</div></body></html>

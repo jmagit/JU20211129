@@ -1,4 +1,4 @@
-package com.gildedrose;
+package com.gildedrose.domains.entities;
 
 public class Item {
 	public int id;
